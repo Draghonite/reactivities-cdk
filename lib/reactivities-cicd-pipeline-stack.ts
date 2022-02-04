@@ -43,6 +43,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         const buildOutput = new codepipeline.Artifact('BuildArtifact');
         const codeBuildProject = new codebuild.Project(this, 'Reactivities-BuildProject', {
             // TODO: continue here (starting w/ environment)
+            projectName: "ReactivitiesBuildProject",
             buildSpec: codebuild.BuildSpec.fromObject({
                 version: '0.2',
                 phases: {
