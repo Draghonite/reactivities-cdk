@@ -10,17 +10,18 @@ export class CICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        // create the pipeline for CI/CD stages
+        // create the pipeline for CI/CD and its stages
         /*
             - Source
-              - url: https://github.com/Draghonite/reactivities
+              - GitHub url: https://github.com/Draghonite/reactivities
             - Build
+              - steps
             - Deploy
         */
         const pipeline = new codepipeline.Pipeline(this, 'ReactivitiesCICDPipeline', {
             pipelineName: 'ReactivitiesCICDPipeline'
-        });
-        // Source (GitHub)
+        });        
+        // #region Source (GitHub)
         const sourceOutput = new codepipeline.Artifact("SourceArtifact");
         const sourceAction = new codepipeline_actions.GitHubSourceAction({
             actionName: 'GitHub_Source',
@@ -31,56 +32,53 @@ export class CICDPipelineStack extends cdk.Stack {
             output: sourceOutput,
             branch: 'main'
         });
-        // Build
-        const buildOutput = new codepipeline.Artifact();
-        const codeBuildProject = new codebuild.Project(this,
-            'CodeBuildProject',
-            // {
-            //   buildSpec: codebuild.BuildSpec.fromSourceFilename('./buidspec.yml'),
-            //   source: sourceOutput
-            // }
-            {
-                buildSpec: codebuild.BuildSpec.fromObject({
-                    version: '0.2',
-                    phases: {
-                        install: {
-                            commands: [
-                                'echo "INSTALL-STAGE"'
-                            ]
-                        },
-                        pre_build: {
-                            commands: [
-                                'echo "PRE-BUILD-STAGE"'
-                            ]
-                        },
-                        build: {
-                            commands: [
-                                'echo "BUILD-STAGE"'
-                            ]
-                        },
-                        post_build: {
-                            commands: [
-                                'echo "POST-BUILD-STAGE"'
-                            ]
-                        },
-                    }
-                })
-            }
-        );
-        const buildAction = new codepipeline_actions.CodeBuildAction({
-            actionName: 'Build',
-            project: codeBuildProject,
-            input: sourceOutput,
-            outputs: [buildOutput]
-        });
-
         pipeline.addStage({
             stageName: 'Source',
             actions: [sourceAction]
+        });
+        // #endregion
+        
+        // #region Build
+        const buildOutput = new codepipeline.Artifact("BuildArtifact");
+        const codeBuildProject = new codebuild.Project(this, 'Reactivities-BuildProject', {
+            // TODO: continue here (starting w/ environment)
+            buildSpec: codebuild.BuildSpec.fromObject({
+                version: '0.2',
+                phases: {
+                    install: {
+                        commands: [
+                            'echo "INSTALL-STAGE"'
+                        ]
+                    },
+                    pre_build: {
+                        commands: [
+                            'echo "PRE-BUILD-STAGE"'
+                        ]
+                    },
+                    build: {
+                        commands: [
+                            'echo "BUILD-STAGE"'
+                        ]
+                    },
+                    post_build: {
+                        commands: [
+                            'echo "POST-BUILD-STAGE"'
+                        ]
+                    },
+                }
+            })
+        });
+        const buildAction = new codepipeline_actions.CodeBuildAction({
+            actionName: 'Build',
+            project: codeBuildProject,
+            variablesNamespace: "BuildVariables",
+            input: sourceOutput,
+            outputs: [buildOutput]
         });
         pipeline.addStage({
             stageName: 'Build',
             actions: [buildAction]
         });
+        // #endregion
     }
 }
