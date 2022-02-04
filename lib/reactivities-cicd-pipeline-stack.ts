@@ -21,12 +21,13 @@ export class CICDPipelineStack extends cdk.Stack {
             pipelineName: 'ReactivitiesCICDPipeline'
         });
         // Source (GitHub)
-        const sourceOutput = new codepipeline.Artifact();
+        const sourceOutput = new codepipeline.Artifact("SourceArtifact");
         const sourceAction = new codepipeline_actions.GitHubSourceAction({
             actionName: 'GitHub_Source',
             owner: 'Draghonite',
             repo: 'reactivities',
             oauthToken: SecretValue.secretsManager('prod/github/draghonite', { jsonField : 'PERSONAL_ACCESS_TOKEN' }),
+            variablesNamespace: "SourceVariables",
             output: sourceOutput,
             branch: 'main'
         });
