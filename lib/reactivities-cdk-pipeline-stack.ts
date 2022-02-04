@@ -33,7 +33,7 @@ export class ReactivitiesCDKPipelineStack extends cdk.Stack {
             })
         });
 
-        const deploy = new ReactivitiesCICDStage(this, "");
+        const deploy = new ReactivitiesCICDStage(this, 'Deploy-CICD');
         const deployStage = pipeline.addStage(deploy);
     }
 }

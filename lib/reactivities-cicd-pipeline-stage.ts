@@ -6,6 +6,8 @@ export class ReactivitiesCICDStage extends Stage {
     constructor(scope: Construct, id: string, props?: StageProps) {
         super(scope, id, props);
         
-        const service = new ReactivitiesCICDPipelineStack(this, 'ReactivitiesCICDPipelineStack');
+        const service = new ReactivitiesCICDPipelineStack(this, 'ReactivitiesCICDPipelineStack', {
+            stackName: "ReactivitiesCICDPipelineStack"
+        });
     }
 }
