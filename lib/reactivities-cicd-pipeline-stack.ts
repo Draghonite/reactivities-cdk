@@ -6,7 +6,7 @@ import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
-export class CICDPipelineStack extends cdk.Stack {
+export class ReactivitiesCICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
@@ -22,13 +22,14 @@ export class CICDPipelineStack extends cdk.Stack {
             pipelineName: 'ReactivitiesCICDPipeline'
         });        
         // #region Source (GitHub)
-        const sourceOutput = new codepipeline.Artifact("SourceArtifact");
+        const sourceOutput = new codepipeline.Artifact('SourceArtifact');
+        // TODO: use v2 source (a codestart connection as this [v1] strategy is no longer recommended)
         const sourceAction = new codepipeline_actions.GitHubSourceAction({
             actionName: 'GitHub_Source',
             owner: 'Draghonite',
             repo: 'reactivities',
             oauthToken: SecretValue.secretsManager('prod/github/draghonite', { jsonField : 'PERSONAL_ACCESS_TOKEN' }),
-            variablesNamespace: "SourceVariables",
+            variablesNamespace: 'SourceVariables',
             output: sourceOutput,
             branch: 'main'
         });
@@ -39,7 +40,7 @@ export class CICDPipelineStack extends cdk.Stack {
         // #endregion
         
         // #region Build
-        const buildOutput = new codepipeline.Artifact("BuildArtifact");
+        const buildOutput = new codepipeline.Artifact('BuildArtifact');
         const codeBuildProject = new codebuild.Project(this, 'Reactivities-BuildProject', {
             // TODO: continue here (starting w/ environment)
             buildSpec: codebuild.BuildSpec.fromObject({
