@@ -42,19 +42,20 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         
         // #region Build
         const buildOutput = new codepipeline.Artifact('BuildArtifact');
-        const codeBuildProject = new codebuild.Project(this, 'Reactivities-BuildProject', {
+        const codeBuildProject = new codebuild.Project(this, 'ReactivitiesBuildProject', {
             projectName: "ReactivitiesBuildProject",
             environment: {
                 buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
                 privileged: true
             },
-            logging: {
-                cloudWatch: {
-                    logGroup: new cdk.aws_logs.LogGroup(this, "ReactivitiesBuildProjectLogGroup", {
-                        logGroupName: "/aws/codebuild/ReactivitiesBuildProject"
-                    })
-                }
-            },
+            // NOTE: breaks the deployment, plus no needed, this is default
+            // logging: {
+            //     cloudWatch: {
+            //         logGroup: new cdk.aws_logs.LogGroup(this, "ReactivitiesBuildProjectLogGroup", {
+            //             logGroupName: "/aws/codebuild/ReactivitiesBuildProject"
+            //         })
+            //     }
+            // },
             buildSpec: codebuild.BuildSpec.fromObject({
                 version: '0.2',
                 phases: {
