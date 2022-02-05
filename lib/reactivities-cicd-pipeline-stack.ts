@@ -42,7 +42,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         
         // #region Build
         const buildOutput = new codepipeline.Artifact('BuildArtifact');
-        const codeBuildProject = new codebuild.Project(this, 'ReactivitiesBuildProject', {
+        const codeBuildProject = new codebuild.Project(this, 'Reactivities-BuildProject', {
             projectName: "ReactivitiesBuildProject",
             environment: {
                 buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
