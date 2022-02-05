@@ -50,7 +50,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             },
             logging: {
                 cloudWatch: {
-                    logGroup: new cdk.aws_logs.LogGroup(this, "ReactivitiesBuildProject", {
+                    logGroup: new cdk.aws_logs.LogGroup(this, "ReactivitiesBuildProjectLogGroup", {
                         logGroupName: "/aws/codebuild/ReactivitiesBuildProject"
                     })
                 }
