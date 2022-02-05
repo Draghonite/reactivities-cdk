@@ -48,8 +48,11 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                 version: '0.2',
                 phases: {
                     install: {
+                        'runtime-versions': {
+                            nodejs: 12
+                        },
                         commands: [
-                            'echo "INSTALL-STAGE"'
+                            '/usr/local/bin/dotnet-install.sh --channel LTS'  // https://github.com/aws/aws-codebuild-docker-images/issues/497
                         ]
                     },
                     pre_build: {
