@@ -5,6 +5,7 @@ import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 
 export class ReactivitiesCICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -41,9 +42,17 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         
         // #region Build
         const buildOutput = new codepipeline.Artifact('BuildArtifact');
-        const codeBuildProject = new codebuild.Project(this, 'Reactivities-BuildProject', {
-            // TODO: continue here (starting w/ environment)
+        const codeBuildProject = new codebuild.Project(this, 'ReactivitiesBuildProject', {
             projectName: "ReactivitiesBuildProject",
+            environment: {
+                buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
+                privileged: true
+            },
+            logging: {
+                cloudWatch: {
+                    logGroup: new cdk.aws_logs.LogGroup(this, "/aws/codebuild/ReactivitiesBuildProject")
+                }
+            },
             buildSpec: codebuild.BuildSpec.fromObject({
                 version: '0.2',
                 phases: {
