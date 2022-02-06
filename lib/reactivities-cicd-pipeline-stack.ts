@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { SecretValue } from 'aws-cdk-lib';
+import { RemovalPolicy, SecretValue } from 'aws-cdk-lib';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
@@ -51,7 +51,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             logging: {
                 cloudWatch: {
                     logGroup: new cdk.aws_logs.LogGroup(this, "ReactivitiesBuildProjectLogGroup", {
-                        logGroupName: "/aws/codebuild/ReactivitiesBuildProject"
+                        logGroupName: "/aws/codebuild/ReactivitiesBuildProject_TEST"
                     })
                 }
             },
