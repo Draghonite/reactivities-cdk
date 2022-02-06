@@ -3,6 +3,7 @@ import { CodeBuildStep, CodePipeline, CodePipelineSource } from 'aws-cdk-lib/pip
 import { SecretValue } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { ReactivitiesCICDStage } from './reactivities-cicd-pipeline-stage';
+import { Repository } from 'aws-cdk-lib/aws-ecr';
 
 export class ReactivitiesCDKPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -32,6 +33,13 @@ export class ReactivitiesCDKPipelineStack extends cdk.Stack {
                 ]
             })
         });
+
+        // CI/CD resources (ECR, ECS)
+        const repository = new Repository(this, "ReactivitiesRepository", {
+            repositoryName: "reactivities-repository"
+        });
+
+        // const containerService = new 
 
         // CI/CD stage (stack) provisioning along w/ necessary services
         const deploy = new ReactivitiesCICDStage(this, 'Deploy-CICD');
