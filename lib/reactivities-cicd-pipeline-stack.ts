@@ -48,14 +48,13 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                 buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
                 privileged: true
             },
-            // NOTE: breaks the deployment, plus no needed, this is default
-            // logging: {
-            //     cloudWatch: {
-            //         logGroup: new cdk.aws_logs.LogGroup(this, "ReactivitiesBuildProjectLogGroup", {
-            //             logGroupName: "/aws/codebuild/ReactivitiesBuildProject"
-            //         })
-            //     }
-            // },
+            logging: {
+                cloudWatch: {
+                    logGroup: new cdk.aws_logs.LogGroup(this, "ReactivitiesBuildProjectLogGroup", {
+                        logGroupName: "/aws/codebuild/ReactivitiesBuildProject"
+                    })
+                }
+            },
             buildSpec: codebuild.BuildSpec.fromObject({
                 version: '0.2',
                 phases: {
