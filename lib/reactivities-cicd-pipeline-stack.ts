@@ -6,10 +6,19 @@ import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
+import { Repository } from 'aws-cdk-lib/aws-ecr';
 
 export class ReactivitiesCICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
+
+        // provision ECR
+        const repository = new Repository(this, "ReactivitiesRepository", {
+            repositoryName: "reactivities-repository"
+        });
+
+        // provision ECS
+        // const containerService = new 
 
         // create the pipeline for CI/CD and its stages
         /*
