@@ -44,10 +44,10 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         const buildOutput = new codepipeline.Artifact('BuildArtifact');
         const codeBuildProject = new codebuild.Project(this, 'ReactivitiesBuildProject', {
             projectName: "ReactivitiesBuildProject",
-            // environment: {
-            //     buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
-            //     privileged: true
-            // },
+            environment: {
+                buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
+                privileged: true
+            },
             // NOTE: breaks the deployment, plus no needed, this is default
             // logging: {
             //     cloudWatch: {
