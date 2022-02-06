@@ -59,7 +59,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                 bucket: new s3.Bucket(this, "ReactivitiesBucket", {
                     bucketName: "reactivities-bucket"
                 }),
-                identifier: "ReactivitiesBuildMain"
+                identifier: "ReactivitiesBuilProject"
             }),
             buildSpec: codebuild.BuildSpec.fromObject({
                 version: '0.2',

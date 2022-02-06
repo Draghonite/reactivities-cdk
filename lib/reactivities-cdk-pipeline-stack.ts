@@ -8,7 +8,7 @@ export class ReactivitiesCDKPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        // create a pipeline for CDK and its stages (watch for code updates to this stack and self-mutate it and the CI/CD stack)
+        // create a pipeline for CDK and its stages (watch for code updates to the CDK stack and self-mutate, provision required CI/CD resources [ECR, ECS, etc.] and provision the CI/CD stack)
         /*
             - Synth
               - Source:ZGitHub url: https://github.com/Draghonite/reactivities-cdk
@@ -33,6 +33,7 @@ export class ReactivitiesCDKPipelineStack extends cdk.Stack {
             })
         });
 
+        // CI/CD stage (stack) provisioning along w/ necessary services
         const deploy = new ReactivitiesCICDStage(this, 'Deploy-CICD');
         const deployStage = pipeline.addStage(deploy);
     }
