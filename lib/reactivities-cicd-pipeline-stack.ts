@@ -30,21 +30,22 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             family: 'ReactivitiesFargateDefinition'
         });
         // const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
-        const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
-            containerName: 'ReactivitiesContainer',
-            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME), "latest"),
-            // cpu: 256,
-            memoryLimitMiB: 512,
-            // environment: {
-            //     'ASPNETCORE_ENVIRONMENT': 'Production',
-            //     'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
-            //     'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
-            //     'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
-            //     'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
-            //     'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
-            // },
-            portMappings: [{ containerPort: 80 }]
-        });
+        const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME)
+        // const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
+        //     containerName: 'ReactivitiesContainer',
+        //     image: ContainerImage.fromEcrRepository(repository, "latest"),
+        //     // cpu: 256,
+        //     memoryLimitMiB: 512,
+        //     // environment: {
+        //     //     'ASPNETCORE_ENVIRONMENT': 'Production',
+        //     //     'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
+        //     //     'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
+        //     //     'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
+        //     //     'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
+        //     //     'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
+        //     // },
+        //     portMappings: [{ containerPort: 80 }]
+        // });
         // TODO: commented out for testing failed deployment of ci/cd pipeline
         // const vpc = new Vpc(this, 'ReactivitiesVPC', {
         //     vpcName: 'ReactivitiesVPC',
