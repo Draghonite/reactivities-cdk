@@ -39,8 +39,8 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             memoryLimitMiB: 512,
             environment: {
                 'ASPNETCORE_ENVIRONMENT': 'Production',
-                'Cloudinary__ApiSecret': secretsmanager.Secret.fromSecretNameV2(this, "CloudinaryAPIKey", "Cloudinary__ApiKey").secretValue.toString(),
-                // 'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
+                // 'Cloudinary__ApiSecret': secretsmanager.Secret.fromSecretNameV2(this, "CloudinarySecret", "Cloudinary__ApiSecret").secretValue.toString(),
+                'Cloudinary__ApiKey': secretsmanager.Secret.fromSecretNameV2(this, "CloudinaryAPIKey", "Cloudinary__ApiKey").secretValue.toString(),
                 // 'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
                 // 'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
                 // 'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
