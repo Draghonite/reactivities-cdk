@@ -43,7 +43,8 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         });
         const fargateTaskDefinition = new FargateTaskDefinition(this, "ReactivitiesFargateDefinition", {
             cpu: 256,
-            memoryLimitMiB: 512
+            memoryLimitMiB: 512,
+            family: "ReactivitiesFargateDefinition"
         });
         // let cloudinaryAPISecret: cdk.aws_secretsmanager.Secret;
         // let cloudinaryCloudName: cdk.aws_secretsmanager.Secret;
