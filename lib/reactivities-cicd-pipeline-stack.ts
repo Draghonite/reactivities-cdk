@@ -41,14 +41,15 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             image: ContainerImage.fromEcrRepository(repository, 'latest'),
             // cpu: 256,
             memoryLimitMiB: 512,
-            environment: {
-                'ASPNETCORE_ENVIRONMENT': 'Production',
-                'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
-                'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
-                'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
-                'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
-                'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
-            },
+            // TODO: commented out for debugging -- breaks deployment of the ci/cd pipeline
+            // environment: {
+            //     'ASPNETCORE_ENVIRONMENT': 'Production',
+            //     'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
+            //     'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
+            //     'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
+            //     'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
+            //     'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
+            // },
             portMappings: [{ containerPort: 80 }]
         });
         const service = new FargateService(this, 'ReactivitiesService', {
@@ -58,20 +59,19 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             minHealthyPercent: 0,
             maxHealthyPercent: 200
         });
-        // TODO: commented out for debugging -- breaks deployment of the ci/cd pipeline
-        // const loadBalander = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
-        //     vpc: vpc,
-        //     internetFacing: true
-        // });
-        // const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
-        // service.registerLoadBalancerTargets({
-        //     containerName: container.containerName,
-        //     containerPort: 80,
-        //     newTargetGroupId: 'ReactivitiesTG',
-        //     listener: ListenerConfig.applicationListener(listener, {
-        //         protocol: ApplicationProtocol.HTTPS
-        //     })
-        // });
+        const loadBalander = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
+            vpc: vpc,
+            internetFacing: true
+        });
+        const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
+        service.registerLoadBalancerTargets({
+            containerName: container.containerName,
+            containerPort: 80,
+            newTargetGroupId: 'ReactivitiesTG',
+            listener: ListenerConfig.applicationListener(listener, {
+                protocol: ApplicationProtocol.HTTPS
+            })
+        });
 
         // create the pipeline for CI/CD and its stages
         /*
