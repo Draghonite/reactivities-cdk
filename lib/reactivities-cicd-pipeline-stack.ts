@@ -24,18 +24,18 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         const vpc = new Vpc(this, "ReactivitiesVPC", {
             vpcName: "ReactivitiesVPC",
             cidr: "10.0.0.0/24",
-            // subnetConfiguration: [
-            //     {
-            //         cidrMask: 24,
-            //         name: 'ingress',
-            //         subnetType: SubnetType.PUBLIC
-            //     },
-            //     {
-            //         cidrMask: 24,
-            //         name: 'application',
-            //         subnetType: SubnetType.PRIVATE_ISOLATED,
-            //     }
-            // ]
+            subnetConfiguration: [
+                {
+                    cidrMask: 24,
+                    name: 'ingress',
+                    subnetType: SubnetType.PUBLIC
+                },
+                {
+                    cidrMask: 24,
+                    name: 'application',
+                    subnetType: SubnetType.PRIVATE_ISOLATED,
+                }
+            ]
         });
         const containerService = new Cluster(this, "ReactivitiesECSCluster", {
             clusterName: "ReactivitiesECSCluster",
@@ -63,8 +63,8 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             //     Cloudinary__ApiSecret: Secret.fromSecretsManager(cloudinaryAPISecret, "Cloudinary__ApiSecret"),
             //     Cloudinary__CloudName: Secret.fromSecretsManager(cloudinaryCloudName, "Cloudinary__CloudName"),
             //     Cloudinary__ApiKey: Secret.fromSecretsManager(cloudinaryAPIKey, "Cloudinary__ApiKey"),
-            //     TokenKey: Secret.fromSecretsManager(tokenKey, "TokenKey"),
-            //     DATABASE_URL: Secret.fromSecretsManager(databaseURL, "DATABASE_URL")
+            //     TokenKey: Secret.fromSecretsManager(tokenKey, "TokenKey"), // TODO: create specifically for the application ("ReactivitiesTokenKey")
+            //     DATABASE_URL: Secret.fromSecretsManager(databaseURL, "DATABASE_URL") // TODO: create specifically for the application ("REACTIVITIES_DATABASE_URL")
             // },
             portMappings: [{ containerPort: 80 }]
         });
