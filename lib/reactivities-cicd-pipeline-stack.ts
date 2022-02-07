@@ -150,7 +150,8 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     pre_build: {
                         commands: [
                             'echo "PRE-BUILD-STAGE"',
-                            'echo "*** CL_API_KEY ***" ${Cloudinary__ApiKey}'
+                            'echo "*** CL_API_KEY ***" ${Cloudinary__ApiKey}',
+                            'echo $Coudinary__ApiKey'
                         ]
                     },
                     build: {
