@@ -16,6 +16,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
+        // TODO: commented out -- everything suddenly fails
         // provision ECR
         const REPOSITORY_NAME = 'reactivities-repository';
         // TODO: provision ECR in its own stack -- otherwise updates to this stack will fail here EVERYTIME
@@ -24,13 +25,12 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         // });
 
         // provision ECS
-        const fargateTaskDefinition = new FargateTaskDefinition(this, 'ReactivitiesFargateDefinition', {
-            cpu: 256,
-            memoryLimitMiB: 512,
-            family: 'ReactivitiesFargateDefinition'
-        });
+        // const fargateTaskDefinition = new FargateTaskDefinition(this, 'ReactivitiesFargateDefinition', {
+        //     cpu: 256,
+        //     memoryLimitMiB: 512,
+        //     family: 'ReactivitiesFargateDefinition'
+        // });
         // const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
-        // TODO: commented out -- it MUST BE this!!
         // const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME)
         // TODO: commented out -- might be the use of the empty repo that's breaking the build?!  wasn't doing it before, was it?
         // const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
@@ -90,8 +90,12 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
               - steps
             - Deploy
         */
+        const bucket = new s3.Bucket(this, 'reactivities-cicd-pipeline', {
+            encryption: s3.BucketEncryption.KMS_MANAGED
+        });
         const pipeline = new codepipeline.Pipeline(this, 'ReactivitiesCICDPipeline', {
-            pipelineName: 'ReactivitiesCICDPipeline'
+            pipelineName: 'ReactivitiesCICDPipeline',
+            artifactBucket: bucket
         });
 
         // #region Source (GitHub)
