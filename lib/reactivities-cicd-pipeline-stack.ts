@@ -24,55 +24,58 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         // });
 
         // provision ECS
-        const vpc = new Vpc(this, 'ReactivitiesVPC', {
-            vpcName: 'ReactivitiesVPC',
-            cidr: '10.0.0.0/24'
-        });
-        const cluster = new Cluster(this, 'ReactivitiesECSCluster', {
-            clusterName: 'ReactivitiesECSCluster',
-            vpc: vpc
-        });
         const fargateTaskDefinition = new FargateTaskDefinition(this, 'ReactivitiesFargateDefinition', {
             cpu: 256,
             memoryLimitMiB: 512,
             family: 'ReactivitiesFargateDefinition'
         });
-        const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
+        // const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
         const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
             containerName: 'ReactivitiesContainer',
             image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME), "latest"),
             // cpu: 256,
             memoryLimitMiB: 512,
-            environment: {
-                'ASPNETCORE_ENVIRONMENT': 'Production',
-                'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
-                'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
-                'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
-                'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
-                'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
-            },
+            // environment: {
+            //     'ASPNETCORE_ENVIRONMENT': 'Production',
+            //     'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
+            //     'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
+            //     'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
+            //     'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
+            //     'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
+            // },
             portMappings: [{ containerPort: 80 }]
         });
-        const service = new FargateService(this, 'ReactivitiesService', {
-            cluster: cluster,
-            taskDefinition: fargateTaskDefinition,
-            desiredCount: 1,
-            minHealthyPercent: 0,
-            maxHealthyPercent: 200
-        });
-        const loadBalander = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
-            vpc: vpc,
-            internetFacing: true
-        });
-        const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
-        service.registerLoadBalancerTargets({
-            containerName: container.containerName,
-            containerPort: 80,
-            newTargetGroupId: 'ReactivitiesTG',
-            listener: ListenerConfig.applicationListener(listener, {
-                protocol: ApplicationProtocol.HTTPS
-            })
-        });
+        // TODO: commented out for testing failed deployment of ci/cd pipeline
+        // const vpc = new Vpc(this, 'ReactivitiesVPC', {
+        //     vpcName: 'ReactivitiesVPC',
+        //     cidr: '10.0.0.0/24'
+        // });
+        // const cluster = new Cluster(this, 'ReactivitiesECSCluster', {
+        //     clusterName: 'ReactivitiesECSCluster',
+        //     vpc: vpc
+        // });
+        // const service = new FargateService(this, 'ReactivitiesService', {
+        //     cluster: cluster,
+        //     taskDefinition: fargateTaskDefinition,
+        //     desiredCount: 1,
+        //     minHealthyPercent: 0,
+        //     maxHealthyPercent: 200
+        // });
+        // const loadBalander = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
+        //     vpc: vpc,
+        //     internetFacing: true
+        // });
+        // const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
+        // service.registerLoadBalancerTargets({
+        //     containerName: container.containerName,
+        //     containerPort: 80,
+        //     newTargetGroupId: 'ReactivitiesTG',
+        //     listener: ListenerConfig.applicationListener(listener, {
+        //         protocol: ApplicationProtocol.HTTPS
+        //     })
+        // });
+
+
 
         // create the pipeline for CI/CD and its stages
         /*
@@ -139,7 +142,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     pre_build: {
                         commands: [
                             'echo "PRE-BUILD-STAGE"',
-                            'echo "*** ENV ***" ${Cloudinary__CloudName}'
+                            // 'echo "*** ENV ***" ${Cloudinary__CloudName}'
                         ]
                     },
                     build: {
