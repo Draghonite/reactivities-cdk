@@ -25,12 +25,12 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         // });
 
         // provision ECS
-        // const fargateTaskDefinition = new FargateTaskDefinition(this, 'ReactivitiesFargateDefinition', {
-        //     cpu: 256,
-        //     memoryLimitMiB: 512,
-        //     family: 'ReactivitiesFargateDefinition'
-        // });
-        // const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
+        const fargateTaskDefinition = new FargateTaskDefinition(this, 'ReactivitiesFargateDefinition', {
+            cpu: 256,
+            memoryLimitMiB: 512,
+            family: 'ReactivitiesFargateDefinition'
+        });
+        const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
         // const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME)
         // const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
         //     containerName: 'ReactivitiesContainer',
