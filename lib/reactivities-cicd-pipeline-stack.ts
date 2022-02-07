@@ -35,12 +35,6 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             memoryLimitMiB: 512,
             family: 'ReactivitiesFargateDefinition'
         });
-        // let cloudinaryAPISecret: cdk.aws_secretsmanager.Secret;
-        // let cloudinaryCloudName: cdk.aws_secretsmanager.Secret;
-        // let cloudinaryAPIKey: cdk.aws_secretsmanager.Secret;
-        // let tokenKey: cdk.aws_secretsmanager.Secret;
-        // let databaseURL: cdk.aws_secretsmanager.Secret;
-        const secretARNReactivities = "arn:aws:secretsmanager:us-east-1:904164939197:secret:staging/reactivities-NG4pyA" // TODO: NO-GO, make account-/environment-agnostic as much as possible
         const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
         const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
             containerName: 'ReactivitiesContainer',
@@ -49,20 +43,12 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             memoryLimitMiB: 512,
             environment: {
                 'ASPNETCORE_ENVIRONMENT': 'Production',
-                'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson("Cloudinary__ApiSecret").toString(),
-                // 'Cloudinary__ApiSecret': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPISecret', 'Cloudinary__ApiSecret').secretValue.toString(),
-                'Cloudinary__ApiKey': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPIKey', 'Cloudinary__ApiKey').secretValue.toString(),
-                'Cloudinary__CloudName': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryCloudName', 'Cloudinary__CloudName').secretValue.toString(),
-                'TokenKey': secretsmanager.Secret.fromSecretNameV2(this, 'ReactivityTokenKey', 'ReactivityTokenKey').secretValue.toString(),
-                'DATABASE_URL': secretsmanager.Secret.fromSecretNameV2(this, 'ReactivityDatabaseURL', 'REACTIVITY_DATABASE_URL').secretValue.toString()
+                'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
+                'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
+                'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
+                'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
+                'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
             },
-            // secrets: {
-                // Cloudinary__ApiSecret: secretsmanager.Secret.fromSecretNameV2(this, "CloudinaryAPISecret", "Cloudinary__ApiSecret") // Secret.fromSecretsManager("cloudinaryAPISecret", 'Cloudinary__ApiSecret'),
-                // Cloudinary__CloudName: Secret.fromSecretsManager(cloudinaryCloudName, 'Cloudinary__CloudName'),
-                // Cloudinary__ApiKey: Secret.fromSecretsManager(cloudinaryAPIKey, 'Cloudinary__ApiKey'),
-                // TokenKey: Secret.fromSecretsManager(tokenKey, 'TokenKey'), // TODO: create specifically for the application ('ReactivitiesTokenKey')
-                // DATABASE_URL: Secret.fromSecretsManager(databaseURL, 'DATABASE_URL') // TODO: create specifically for the application ('REACTIVITIES_DATABASE_URL')
-            // },
             portMappings: [{ containerPort: 80 }]
         });
         const service = new FargateService(this, 'ReactivitiesService', {
