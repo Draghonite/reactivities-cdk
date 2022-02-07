@@ -31,6 +31,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         });
         // const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
         const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME)
+        // TODO: commented out -- might be the use of the empty repo that's breaking the build?!  wasn't doing it before, was it?
         // const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
         //     containerName: 'ReactivitiesContainer',
         //     image: ContainerImage.fromEcrRepository(repository, "latest"),
@@ -46,6 +47,8 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         //     // },
         //     portMappings: [{ containerPort: 80 }]
         // });
+
+
         // TODO: commented out for testing failed deployment of ci/cd pipeline
         // const vpc = new Vpc(this, 'ReactivitiesVPC', {
         //     vpcName: 'ReactivitiesVPC',
