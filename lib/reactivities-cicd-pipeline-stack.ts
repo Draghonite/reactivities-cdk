@@ -91,7 +91,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             - Deploy
         */
         const bucket = new s3.Bucket(this, 'reactivities-cicd-pipeline', {
-            encryption: s3.BucketEncryption.KMS_MANAGED
+            
         });
         const pipeline = new codepipeline.Pipeline(this, 'ReactivitiesCICDPipeline', {
             pipelineName: 'ReactivitiesCICDPipeline',
