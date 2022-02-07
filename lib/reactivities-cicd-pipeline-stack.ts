@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { RemovalPolicy, SecretValue } from 'aws-cdk-lib';
+import { SecretValue } from 'aws-cdk-lib';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
@@ -7,10 +7,10 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
-import { SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, ListenerConfig, Secret } from 'aws-cdk-lib/aws-ecs';
-import { RuntimeFamily } from 'aws-cdk-lib/aws-lambda';
+import { Vpc } from 'aws-cdk-lib/aws-ec2';
+import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, ListenerConfig } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 
 export class ReactivitiesCICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -40,20 +40,28 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         // let cloudinaryAPIKey: cdk.aws_secretsmanager.Secret;
         // let tokenKey: cdk.aws_secretsmanager.Secret;
         // let databaseURL: cdk.aws_secretsmanager.Secret;
+        const secretARNReactivities = "arn:aws:secretsmanager:us-east-1:904164939197:secret:staging/reactivities-NG4pyA" // TODO: NO-GO, make account-/environment-agnostic as much as possible
+        const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
         const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
             containerName: 'ReactivitiesContainer',
             image: ContainerImage.fromEcrRepository(repository, 'latest'),
-            cpu: 256,
+            // cpu: 256,
             memoryLimitMiB: 512,
             environment: {
-                'ASPNETCORE_ENVIRONMENT': 'Production'
+                'ASPNETCORE_ENVIRONMENT': 'Production',
+                'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson("Cloudinary__ApiSecret").toString(),
+                // 'Cloudinary__ApiSecret': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPISecret', 'Cloudinary__ApiSecret').secretValue.toString(),
+                'Cloudinary__ApiKey': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPIKey', 'Cloudinary__ApiKey').secretValue.toString(),
+                'Cloudinary__CloudName': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryCloudName', 'Cloudinary__CloudName').secretValue.toString(),
+                'TokenKey': secretsmanager.Secret.fromSecretNameV2(this, 'ReactivityTokenKey', 'ReactivityTokenKey').secretValue.toString(),
+                'DATABASE_URL': secretsmanager.Secret.fromSecretNameV2(this, 'ReactivityDatabaseURL', 'REACTIVITY_DATABASE_URL').secretValue.toString()
             },
             // secrets: {
-            //     Cloudinary__ApiSecret: Secret.fromSecretsManager(cloudinaryAPISecret, 'Cloudinary__ApiSecret'),
-            //     Cloudinary__CloudName: Secret.fromSecretsManager(cloudinaryCloudName, 'Cloudinary__CloudName'),
-            //     Cloudinary__ApiKey: Secret.fromSecretsManager(cloudinaryAPIKey, 'Cloudinary__ApiKey'),
-            //     TokenKey: Secret.fromSecretsManager(tokenKey, 'TokenKey'), // TODO: create specifically for the application ('ReactivitiesTokenKey')
-            //     DATABASE_URL: Secret.fromSecretsManager(databaseURL, 'DATABASE_URL') // TODO: create specifically for the application ('REACTIVITIES_DATABASE_URL')
+                // Cloudinary__ApiSecret: secretsmanager.Secret.fromSecretNameV2(this, "CloudinaryAPISecret", "Cloudinary__ApiSecret") // Secret.fromSecretsManager("cloudinaryAPISecret", 'Cloudinary__ApiSecret'),
+                // Cloudinary__CloudName: Secret.fromSecretsManager(cloudinaryCloudName, 'Cloudinary__CloudName'),
+                // Cloudinary__ApiKey: Secret.fromSecretsManager(cloudinaryAPIKey, 'Cloudinary__ApiKey'),
+                // TokenKey: Secret.fromSecretsManager(tokenKey, 'TokenKey'), // TODO: create specifically for the application ('ReactivitiesTokenKey')
+                // DATABASE_URL: Secret.fromSecretsManager(databaseURL, 'DATABASE_URL') // TODO: create specifically for the application ('REACTIVITIES_DATABASE_URL')
             // },
             portMappings: [{ containerPort: 80 }]
         });
@@ -70,7 +78,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         });
         const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
         service.registerLoadBalancerTargets({
-            containerName: 'ReactivitiesContainer',
+            containerName: container.containerName,
             containerPort: 80,
             newTargetGroupId: 'ReactivitiesTG',
             listener: ListenerConfig.applicationListener(listener, {
@@ -88,7 +96,8 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         */
         const pipeline = new codepipeline.Pipeline(this, 'ReactivitiesCICDPipeline', {
             pipelineName: 'ReactivitiesCICDPipeline'
-        });        
+        });
+
         // #region Source (GitHub)
         const sourceOutput = new codepipeline.Artifact('SourceArtifact');
         // TODO: use v2 source (a codestart connection as this [v1] strategy is no longer recommended)
@@ -141,7 +150,8 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     },
                     pre_build: {
                         commands: [
-                            'echo "PRE-BUILD-STAGE"'
+                            'echo "PRE-BUILD-STAGE"',
+                            'echo "*** ENV ***" ${Cloudinary__CloudName}'
                         ]
                     },
                     build: {
