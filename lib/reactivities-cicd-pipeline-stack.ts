@@ -17,9 +17,11 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         super(scope, id, props);
 
         // provision ECR
-        const repository = new Repository(this, 'ReactivitiesRepository', {
-            repositoryName: 'reactivities-repository'
-        });
+        const REPOSITORY_NAME = 'reactivities-repository';
+        // TODO: provision ECR in its own stack -- otherwise updates to this stack will fail here EVERYTIME
+        // const repository = new Repository(this, 'ReactivitiesRepository', {
+        //     repositoryName: REPOSITORY_NAME
+        // });
 
         // provision ECS
         const vpc = new Vpc(this, 'ReactivitiesVPC', {
@@ -38,18 +40,17 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
         const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
             containerName: 'ReactivitiesContainer',
-            image: ContainerImage.fromEcrRepository(repository, 'latest'),
+            image: ContainerImage.fromEcrRepository(Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME), "latest"),
             // cpu: 256,
             memoryLimitMiB: 512,
-            // TODO: commented out for debugging -- breaks deployment of the ci/cd pipeline
-            // environment: {
-            //     'ASPNETCORE_ENVIRONMENT': 'Production',
-            //     'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
-            //     'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
-            //     'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
-            //     'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
-            //     'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
-            // },
+            environment: {
+                'ASPNETCORE_ENVIRONMENT': 'Production',
+                'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
+                'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
+                'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
+                'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
+                'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
+            },
             portMappings: [{ containerPort: 80 }]
         });
         const service = new FargateService(this, 'ReactivitiesService', {
