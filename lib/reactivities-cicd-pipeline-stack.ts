@@ -58,19 +58,20 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             minHealthyPercent: 0,
             maxHealthyPercent: 200
         });
-        const loadBalander = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
-            vpc: vpc,
-            internetFacing: true
-        });
-        const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
-        service.registerLoadBalancerTargets({
-            containerName: container.containerName,
-            containerPort: 80,
-            newTargetGroupId: 'ReactivitiesTG',
-            listener: ListenerConfig.applicationListener(listener, {
-                protocol: ApplicationProtocol.HTTPS
-            })
-        });
+        // TODO: commented out for debugging -- breaks deployment of the ci/cd pipeline
+        // const loadBalander = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
+        //     vpc: vpc,
+        //     internetFacing: true
+        // });
+        // const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
+        // service.registerLoadBalancerTargets({
+        //     containerName: container.containerName,
+        //     containerPort: 80,
+        //     newTargetGroupId: 'ReactivitiesTG',
+        //     listener: ListenerConfig.applicationListener(listener, {
+        //         protocol: ApplicationProtocol.HTTPS
+        //     })
+        // });
 
         // create the pipeline for CI/CD and its stages
         /*
