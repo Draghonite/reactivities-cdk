@@ -25,28 +25,28 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         // });
 
         // provision ECS
-        const fargateTaskDefinition = new FargateTaskDefinition(this, 'ReactivitiesFargateDefinition', {
-            cpu: 256,
-            memoryLimitMiB: 512,
-            family: 'ReactivitiesFargateDefinition'
-        });
-        const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
-        const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME)
-        const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
-            containerName: 'ReactivitiesContainer',
-            image: ContainerImage.fromEcrRepository(repository, "latest"),
-            // cpu: 256,
-            memoryLimitMiB: 512,
-            environment: {
-                'ASPNETCORE_ENVIRONMENT': 'Production',
-                'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
-                'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
-                'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
-                'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
-                'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
-            },
-            portMappings: [{ containerPort: 80 }]
-        });
+        // const fargateTaskDefinition = new FargateTaskDefinition(this, 'ReactivitiesFargateDefinition', {
+        //     cpu: 256,
+        //     memoryLimitMiB: 512,
+        //     family: 'ReactivitiesFargateDefinition'
+        // });
+        // const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
+        // const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME)
+        // const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
+        //     containerName: 'ReactivitiesContainer',
+        //     image: ContainerImage.fromEcrRepository(repository, "latest"),
+        //     // cpu: 256,
+        //     memoryLimitMiB: 512,
+        //     environment: {
+        //         'ASPNETCORE_ENVIRONMENT': 'Production',
+        //         'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
+        //         'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
+        //         'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
+        //         'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
+        //         'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
+        //     },
+        //     portMappings: [{ containerPort: 80 }]
+        // });
 
 
         // TODO: commented out for testing failed deployment of ci/cd pipeline
