@@ -94,7 +94,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             
         });
         const pipeline = new codepipeline.Pipeline(this, 'ReactivitiesCICDPipeline', {
-            pipelineName: 'ReactivitiesCICDPipeline1',
+            // pipelineName: 'ReactivitiesCICDPipeline1',
             artifactBucket: bucket
         });
 
@@ -119,24 +119,24 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         // #region Build
         const buildOutput = new codepipeline.Artifact('BuildArtifact');
         const codeBuildProject = new codebuild.Project(this, 'ReactivitiesBuildProject', {
-            projectName: 'ReactivitiesBuildProject',
+            // projectName: 'ReactivitiesBuildProject',
             environment: {
                 buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
                 privileged: true
             },
-            logging: {
-                cloudWatch: {
-                    logGroup: new cdk.aws_logs.LogGroup(this, 'ReactivitiesBuildProjectLogGroup', {
-                        logGroupName: '/aws/codebuild/ReactivitiesBuildProject'
-                    })
-                }
-            },
-            artifacts: codebuild.Artifacts.s3({
-                bucket: new s3.Bucket(this, 'ReactivitiesBucket', {
-                    bucketName: 'reactivities-bucket'
-                }),
-                identifier: 'ReactivitiesBuildProject'
-            }),
+            // logging: {
+            //     cloudWatch: {
+            //         logGroup: new cdk.aws_logs.LogGroup(this, 'ReactivitiesBuildProjectLogGroup', {
+            //             logGroupName: '/aws/codebuild/ReactivitiesBuildProject'
+            //         })
+            //     }
+            // },
+            // artifacts: codebuild.Artifacts.s3({
+            //     bucket: new s3.Bucket(this, 'ReactivitiesBucket', {
+            //         bucketName: 'reactivities-bucket'
+            //     }),
+            //     identifier: 'ReactivitiesBuildProject'
+            // }),
             buildSpec: codebuild.BuildSpec.fromObject({
                 version: '0.2',
                 phases: {
