@@ -7,6 +7,9 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
+import { SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { Cluster, ContainerImage, FargateTaskDefinition, Secret } from 'aws-cdk-lib/aws-ecs';
+import { RuntimeFamily } from 'aws-cdk-lib/aws-lambda';
 
 export class ReactivitiesCICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -18,7 +21,53 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         });
 
         // provision ECS
-        // const containerService = new 
+        const vpc = new Vpc(this, "ReactivitiesVPC", {
+            vpcName: "ReactivitiesVPC",
+            cidr: "10.0.0.0/24",
+            // subnetConfiguration: [
+            //     {
+            //         cidrMask: 24,
+            //         name: 'ingress',
+            //         subnetType: SubnetType.PUBLIC
+            //     },
+            //     {
+            //         cidrMask: 24,
+            //         name: 'application',
+            //         subnetType: SubnetType.PRIVATE_ISOLATED,
+            //     }
+            // ]
+        });
+        const containerService = new Cluster(this, "ReactivitiesECSCluster", {
+            clusterName: "ReactivitiesECSCluster",
+            vpc: vpc
+        });
+        const fargateTaskDefinition = new FargateTaskDefinition(this, "ReactivitiesFargateDefinition", {
+            cpu: 256,
+            memoryLimitMiB: 512
+        });
+        // let cloudinaryAPISecret: cdk.aws_secretsmanager.Secret;
+        // let cloudinaryCloudName: cdk.aws_secretsmanager.Secret;
+        // let cloudinaryAPIKey: cdk.aws_secretsmanager.Secret;
+        // let tokenKey: cdk.aws_secretsmanager.Secret;
+        // let databaseURL: cdk.aws_secretsmanager.Secret;
+        const container = fargateTaskDefinition.addContainer("ReactivitiesContainer", {
+            containerName: "ReactivitiesContainer",
+            image: ContainerImage.fromEcrRepository(repository, "latest"),
+            cpu: 256,
+            memoryLimitMiB: 512,
+            environment: {
+                "ASPNETCORE_ENVIRONMENT": "Production"
+            },
+            // secrets: {
+            //     Cloudinary__ApiSecret: Secret.fromSecretsManager(cloudinaryAPISecret, "Cloudinary__ApiSecret"),
+            //     Cloudinary__CloudName: Secret.fromSecretsManager(cloudinaryCloudName, "Cloudinary__CloudName"),
+            //     Cloudinary__ApiKey: Secret.fromSecretsManager(cloudinaryAPIKey, "Cloudinary__ApiKey"),
+            //     TokenKey: Secret.fromSecretsManager(tokenKey, "TokenKey"),
+            //     DATABASE_URL: Secret.fromSecretsManager(databaseURL, "DATABASE_URL")
+            // },
+            portMappings: [{ containerPort: 80 }]
+        });
+        // TODO: needs at least a service and an ALB
 
         // create the pipeline for CI/CD and its stages
         /*
