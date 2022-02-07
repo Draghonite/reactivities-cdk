@@ -31,22 +31,22 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             family: 'ReactivitiesFargateDefinition'
         });
         const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
-        // const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME)
-        // const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
-        //     containerName: 'ReactivitiesContainer',
-        //     image: ContainerImage.fromEcrRepository(repository, "latest"),
-        //     // cpu: 256,
-        //     memoryLimitMiB: 512,
-        //     environment: {
-        //         'ASPNETCORE_ENVIRONMENT': 'Production',
-        //         'Cloudinary__ApiSecret': secretReactivities.secretValueFromJson('Cloudinary__ApiSecret').toString(),
-        //         'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
-        //         'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
-        //         'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
-        //         'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
-        //     },
-        //     portMappings: [{ containerPort: 80 }]
-        // });
+        const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME)
+        const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
+            containerName: 'ReactivitiesContainer',
+            image: ContainerImage.fromEcrRepository(repository, "latest"),
+            // cpu: 256,
+            memoryLimitMiB: 512,
+            environment: {
+                'ASPNETCORE_ENVIRONMENT': 'Production',
+                'Cloudinary__ApiSecret': secretsmanager.Secret.fromSecretNameV2(this, "CloudinaryAPIKey", "Cloudinary__ApiKey").secretValue.toString(),
+                // 'Cloudinary__ApiKey': secretReactivities.secretValueFromJson('Cloudinary__ApiKey').toString(),
+                // 'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
+                // 'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
+                // 'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
+            },
+            portMappings: [{ containerPort: 80 }]
+        });
 
 
         // TODO: commented out for testing failed deployment of ci/cd pipeline
@@ -150,7 +150,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     pre_build: {
                         commands: [
                             'echo "PRE-BUILD-STAGE"',
-                            'echo "*** ENV ***" ${Cloudinary__CloudName}'
+                            'echo "*** CL_API_KEY ***" ${Cloudinary__ApiKey}'
                         ]
                     },
                     build: {
