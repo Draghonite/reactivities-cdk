@@ -54,7 +54,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             // projectName: 'ReactivitiesBuildProject',
             artifacts: codebuild.Artifacts.s3({
                 bucket,
-                path: 'ReactivitiesBuildProject'
+                name: 'ReactivitiesBuildProject'
             }),
             environment: {
                 buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
