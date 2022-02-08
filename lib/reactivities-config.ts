@@ -1,5 +1,5 @@
 export default class ReactivitiesConfig {
-    static REPOSITORY_NAME = 'reactivities-repository';
+    static ECR_REPOSITORY_NAME = 'reactivities-repository';
     static VPC_NAME = 'reactivities-vpc';
     static VPC_CIDR = '10.0.0.0/24';
     static ECS_CLUSTER_NAME = 'reactivities-ecs-cluster';
@@ -8,4 +8,5 @@ export default class ReactivitiesConfig {
     static ECS_FARGATE_CPU = 256;
     static ECS_FARGATE_MEMORY_LIMIT = 512;
     static ECS_FARGATE_CONTAINER_PORT = 80;
+    static CICD_PIPELINE_NAME = 'ReactivitiesCICDPipeline';
 }

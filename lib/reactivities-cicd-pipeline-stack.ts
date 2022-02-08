@@ -13,7 +13,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
-        const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", ReactivitiesConfig.REPOSITORY_NAME);
+        const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", ReactivitiesConfig.ECR_REPOSITORY_NAME);
 
         // create the pipeline for CI/CD and its stages
         /*
@@ -25,7 +25,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         */
         const bucket = new s3.Bucket(this, 'reactivities-cicd-pipeline');
         const pipeline = new codepipeline.Pipeline(this, 'ReactivitiesCICDPipeline', {
-            // pipelineName: 'ReactivitiesCICDPipeline',
+            pipelineName: ReactivitiesConfig.CICD_PIPELINE_NAME,
             artifactBucket: bucket
         });
 
@@ -88,7 +88,14 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                             'echo "PRE-BUILD-STAGE"',
                             'echo $REPOSITORY_URI',
                             'echo Restore started on `date`',
-                            'dotnet restore src/API/API.csproj'
+                            // # DotNet - restore dependencies
+                            'dotnet restore src/API/API.csproj',
+                            // # ECR - login and get metadata
+                            'echo Logging in to Amazon ECR...',
+                            'aws --version',
+                            '$(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)',
+                            'COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)',
+                            'IMAGE_TAG=${COMMIT_HASH:=latest}'
                         ]
                     },
                     build: {

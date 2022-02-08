@@ -14,7 +14,7 @@ export class ReactivitiesInfrastructureStack extends cdk.Stack {
 
         // provision ECR
         const repository = new Repository(this, 'ReactivitiesRepository', {
-            repositoryName: ReactivitiesConfig.REPOSITORY_NAME,
+            repositoryName: ReactivitiesConfig.ECR_REPOSITORY_NAME,
             // NOTE: dangerous but this IS meant to be a one-time deployment stack and if redeployment is necessary, would be justified
             removalPolicy: RemovalPolicy.DESTROY
         });
