@@ -31,7 +31,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             family: 'ReactivitiesFargateDefinition'
         });
         const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
-        const mySecret = secretsmanager.Secret.fromSecretCompleteArn(this, "mySecret", "arn:aws:secretsmanager:<region>:<account-id-number>:secret:<secret-name>-<random-6-characters>");
+        // const mySecret = secretsmanager.Secret.fromSecretCompleteArn(this, "mySecret", "arn:aws:secretsmanager:<region>:<account-id-number>:secret:<secret-name>-<random-6-characters>");
         const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME);
         const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
             containerName: 'ReactivitiesContainer',
