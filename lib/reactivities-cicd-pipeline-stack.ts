@@ -3,6 +3,7 @@ import { SecretValue } from 'aws-cdk-lib';
 import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
 import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
+import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
@@ -174,8 +175,15 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         });
         // #endregion
     
+        // TODO: need to figure this out -- performing an ECS deployment via a CodePipline stage/action
         // #region Deploy
-
+        // const deployAction = new ecs.FargateService(this, 'ReactivitiesDeployProject', {
+        //     cluster
+        // });
+        // pipeline.addStage({
+        //     stageName: 'Deploy',
+        //     actions: [deployAction]
+        // });
         // #endregion
     }
 }

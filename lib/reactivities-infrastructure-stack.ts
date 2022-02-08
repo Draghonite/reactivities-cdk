@@ -58,20 +58,24 @@ export class ReactivitiesInfrastructureStack extends cdk.Stack {
             minHealthyPercent: 0,
             maxHealthyPercent: 200
         });
-        const loadBalander = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
+        const loadBalancer = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
             vpc: vpc,
             internetFacing: true
         });
-        const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
+        const listener = loadBalancer.addListener('ReactivitiesALBListener', { port: 80, open: true });
         service.registerLoadBalancerTargets({
             containerName: ReactivitiesConfig.ECS_FARGATE_CONTAINER_NAME,
             containerPort: 80,
             newTargetGroupId: 'ReactivitiesTG',
             listener: ListenerConfig.applicationListener(listener, {
-                // TODO: changed from HTTPS to HTTP, need to reconstitute (destroy/deploy) and verify functionality; do we want/need HTTPS here/now?
-                protocol: ApplicationProtocol.HTTP
+                protocol: ApplicationProtocol.HTTP,
+                port: 80
             })
         });
+        // output the path to access the service
+        new cdk.CfnOutput(this, 'ReactivitiesLoadBalancerDNS', { value: loadBalancer.loadBalancerDnsName });
+
+
         // TODO: the newly-created vpc has a new route table that needs connection to the new internet gateway allowing 0.0.0.0/0
         // TODO: document any manual clean-up necessary -- e.g. EIP, ENI, Subnet, VPC, SG, ... may remain between deployments
     }
