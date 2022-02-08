@@ -133,6 +133,22 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                             'cat imagedefinitions.json'
                         ]
                     },
+                },
+                reports: {
+                    TestResults: {
+                        'file-format': 'VisualStudioTrx',
+                        files: [
+                            '**/*'
+                        ],
+                        'base-directory': './testresults'
+                    }
+                },
+                artifacts: {
+                    files: [
+                        '/app/publish/*',
+                        '/testreports/*',
+                        'imagedefinitions.json'
+                    ]
                 }
             })
         });
