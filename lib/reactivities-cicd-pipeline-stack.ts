@@ -122,7 +122,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                 buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
                 privileged: true,
                 environmentVariables: {
-                    REPOSITORY_URI: { value: 'TEST-VALUE' }
+                    REPOSITORY_URI: { value: repository.repositoryUri }
                 }
             },
             // logging: {
