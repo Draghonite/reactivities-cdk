@@ -31,7 +31,6 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             family: 'ReactivitiesFargateDefinition'
         });
         const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
-        // const mySecret = secretsmanager.Secret.fromSecretCompleteArn(this, "mySecret", "arn:aws:secretsmanager:<region>:<account-id-number>:secret:<secret-name>-<random-6-characters>");
         const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME);
         const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
             containerName: 'ReactivitiesContainer',
@@ -41,13 +40,17 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             environment: {
                 'ASPNETCORE_ENVIRONMENT': 'Production',
                 // 'Cloudinary__ApiSecret': secretsmanager.Secret.fromSecretNameV2(this, "CloudinarySecret", "Cloudinary__ApiSecret").secretValue.toString(),
-                'Cloudinary__ApiKey': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPIKey', 'Cloudinary__ApiKey').secretValue.toString(),
+                // 'Cloudinary__ApiKey': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPIKey', 'Cloudinary__ApiKey').secretValue.toString(),
                 // 'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
                 // 'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
                 // 'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
             },
             secrets: {
-                'Cloudinary__ApiSecret': Secret.fromSecretsManager(secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPISecret', 'Cloudinary__ApiSecret'))
+                'Cloudinary__ApiSecret': Secret.fromSecretsManager(secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPISecret', 'Cloudinary__ApiSecret')),
+                'Cloudinary__ApiKey': Secret.fromSecretsManager(secretReactivities, 'Cloudinary__ApiKey'),
+                'Cloudinary__CloudName': Secret.fromSecretsManager(secretReactivities, 'Cloudinary__CloudName'),
+                'TokenKey': Secret.fromSecretsManager(secretReactivities, 'TokenKey'),
+                'DATABASE_URL': Secret.fromSecretsManager(secretReactivities, 'DATABASE_URL')
             },
             portMappings: [{ containerPort: 80 }]
         });
@@ -125,7 +128,10 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             // projectName: 'ReactivitiesBuildProject',
             environment: {
                 buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
-                privileged: true
+                privileged: true,
+                environmentVariables: {
+                    REPOSITORY_URI: { value: 'TEST-VALUE' }
+                }
             },
             // logging: {
             //     cloudWatch: {
@@ -155,10 +161,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     pre_build: {
                         commands: [
                             'echo "PRE-BUILD-STAGE"',
-                            'echo "*** CL_API_VALUES ***"',
-                            'echo $Cloudinary__ApiSecret',
-                            'echo $Cloudinary__ApiKey',
-                            'echo $Cloudinary__CloudName'
+                            'echo $REPOSITORY_URI'
                         ]
                     },
                     build: {
