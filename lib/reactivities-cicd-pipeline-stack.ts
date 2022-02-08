@@ -101,12 +101,29 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     },
                     build: {
                         commands: [
-                            'echo "BUILD-STAGE"'
+                            'echo "BUILD-STAGE"',
+                            'echo Build started on `date`',
+                            // # Client app - install client app dependencies, run tests and build (NOTE: 'npm run build' copies build output to the DotNet app for self-hosting)
+                            'echo Building client app',
+                            'cd src/client-app',
+                            'npm install',
+                            'npm run build',
+                            'npm test -- --watchAll=false',
+                            'cd ../..',
+                            // # DotNet - run tests and build server/api for release
+                            'echo Building dotnet',
+                            'dotnet build src/API/API.csproj -c Release -o /app/build',
+                            'echo Test started on `date`',
+                            'dotnet test -c Release --logger trx --results-directory ./testresults',
+                            // # ECR - build Docker image and tag appropriately
+                            'echo Building the Docker image...',
+                            'docker build -t $REPOSITORY_URI:latest .',
+                            'docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG'
                         ]
                     },
                     post_build: {
                         commands: [
-                            'echo "POST-BUILD-STAGE"'
+                            'echo "POST-BUILD-STAGE"',
                         ]
                     },
                 }
