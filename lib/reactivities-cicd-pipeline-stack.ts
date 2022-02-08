@@ -19,7 +19,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         // TODO: commented out -- everything suddenly fails
         // provision ECR
         const REPOSITORY_NAME = 'reactivities-repository';
-        // TODO: provision ECR in its own stack -- otherwise updates to this stack will fail here EVERYTIME
+        // TODO: provision ECR in its own stack to use a static repo name -- otherwise updates to this stack will fail here EVERYTIME
         // const repository = new Repository(this, 'ReactivitiesRepository', {
         //     repositoryName: REPOSITORY_NAME
         // });
@@ -35,18 +35,12 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
             containerName: 'ReactivitiesContainer',
             image: ContainerImage.fromEcrRepository(repository, "latest"),
-            // cpu: 256,
             memoryLimitMiB: 512,
             environment: {
-                'ASPNETCORE_ENVIRONMENT': 'Production',
-                // 'Cloudinary__ApiSecret': secretsmanager.Secret.fromSecretNameV2(this, "CloudinarySecret", "Cloudinary__ApiSecret").secretValue.toString(),
-                // 'Cloudinary__ApiKey': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPIKey', 'Cloudinary__ApiKey').secretValue.toString(),
-                // 'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
-                // 'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
-                // 'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
+                'ASPNETCORE_ENVIRONMENT': 'Production'
             },
             secrets: {
-                'Cloudinary__ApiSecret': Secret.fromSecretsManager(secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPISecret', 'Cloudinary__ApiSecret')),
+                'Cloudinary__ApiSecret': Secret.fromSecretsManager(secretReactivities, 'Cloudinary__ApiSecret'),
                 'Cloudinary__ApiKey': Secret.fromSecretsManager(secretReactivities, 'Cloudinary__ApiKey'),
                 'Cloudinary__CloudName': Secret.fromSecretsManager(secretReactivities, 'Cloudinary__CloudName'),
                 'TokenKey': Secret.fromSecretsManager(secretReactivities, 'TokenKey'),
@@ -55,36 +49,34 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             portMappings: [{ containerPort: 80 }]
         });
 
-
-        // TODO: commented out for testing failed deployment of ci/cd pipeline
-        // const vpc = new Vpc(this, 'ReactivitiesVPC', {
-        //     vpcName: 'ReactivitiesVPC',
-        //     cidr: '10.0.0.0/24'
-        // });
-        // const cluster = new Cluster(this, 'ReactivitiesECSCluster', {
-        //     clusterName: 'ReactivitiesECSCluster',
-        //     vpc: vpc
-        // });
-        // const service = new FargateService(this, 'ReactivitiesService', {
-        //     cluster: cluster,
-        //     taskDefinition: fargateTaskDefinition,
-        //     desiredCount: 1,
-        //     minHealthyPercent: 0,
-        //     maxHealthyPercent: 200
-        // });
-        // const loadBalander = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
-        //     vpc: vpc,
-        //     internetFacing: true
-        // });
-        // const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
-        // service.registerLoadBalancerTargets({
-        //     containerName: container.containerName,
-        //     containerPort: 80,
-        //     newTargetGroupId: 'ReactivitiesTG',
-        //     listener: ListenerConfig.applicationListener(listener, {
-        //         protocol: ApplicationProtocol.HTTPS
-        //     })
-        // });
+        const vpc = new Vpc(this, 'ReactivitiesVPC', {
+            // vpcName: 'ReactivitiesVPC',
+            cidr: '10.0.0.0/24'
+        });
+        const cluster = new Cluster(this, 'ReactivitiesECSCluster', {
+            // clusterName: 'ReactivitiesECSCluster',
+            vpc: vpc
+        });
+        const service = new FargateService(this, 'ReactivitiesService', {
+            cluster: cluster,
+            taskDefinition: fargateTaskDefinition,
+            desiredCount: 1,
+            minHealthyPercent: 0,
+            maxHealthyPercent: 200
+        });
+        const loadBalander = new ApplicationLoadBalancer(this, 'ReactivitesALB', {
+            vpc: vpc,
+            internetFacing: true
+        });
+        const listener = loadBalander.addListener('ReactivitiesALBListener', { port: 80 });
+        service.registerLoadBalancerTargets({
+            containerName: container.containerName,
+            containerPort: 80,
+            newTargetGroupId: 'ReactivitiesTG',
+            listener: ListenerConfig.applicationListener(listener, {
+                protocol: ApplicationProtocol.HTTPS
+            })
+        });
 
 
 
