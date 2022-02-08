@@ -86,7 +86,9 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     pre_build: {
                         commands: [
                             'echo "PRE-BUILD-STAGE"',
-                            'echo $REPOSITORY_URI'
+                            'echo $REPOSITORY_URI',
+                            'echo Restore started on `date`',
+                            'dotnet restore src/API/API.csproj'
                         ]
                     },
                     build: {

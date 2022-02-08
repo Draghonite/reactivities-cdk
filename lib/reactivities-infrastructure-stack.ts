@@ -6,6 +6,7 @@ import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, Listene
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import ReactivitiesConfig from './reactivities-config';
+import { RemovalPolicy } from 'aws-cdk-lib';
 
 export class ReactivitiesInfrastructureStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -13,7 +14,9 @@ export class ReactivitiesInfrastructureStack extends cdk.Stack {
 
         // provision ECR
         const repository = new Repository(this, 'ReactivitiesRepository', {
-            repositoryName: ReactivitiesConfig.REPOSITORY_NAME
+            repositoryName: ReactivitiesConfig.REPOSITORY_NAME,
+            // NOTE: dangerous but this IS meant to be a one-time deployment stack and if redeployment is necessary, would be justified
+            removalPolicy: RemovalPolicy.DESTROY
         });
 
         // provision ECS
