@@ -68,9 +68,11 @@ export class ReactivitiesInfrastructureStack extends cdk.Stack {
             containerPort: 80,
             newTargetGroupId: 'ReactivitiesTG',
             listener: ListenerConfig.applicationListener(listener, {
-                protocol: ApplicationProtocol.HTTPS
+                // TODO: changed from HTTPS to HTTP, need to reconstitute (destroy/deploy) and verify functionality; do we want/need HTTPS here/now?
+                protocol: ApplicationProtocol.HTTP
             })
         });
+        // TODO: the newly-created vpc has a new route table that needs connection to the new internet gateway allowing 0.0.0.0/0
         // TODO: document any manual clean-up necessary -- e.g. EIP, ENI, Subnet, VPC, SG, ... may remain between deployments
     }
 }

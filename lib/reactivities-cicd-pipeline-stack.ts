@@ -52,6 +52,10 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         const buildOutput = new codepipeline.Artifact('BuildArtifact');
         const codeBuildProject = new codebuild.Project(this, 'ReactivitiesBuildProject', {
             // projectName: 'ReactivitiesBuildProject',
+            artifacts: codebuild.Artifacts.s3({
+                bucket,
+                path: 'ReactivitiesBuildProject'
+            }),
             environment: {
                 buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
                 privileged: true,
@@ -59,19 +63,6 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     REPOSITORY_URI: { value: repository.repositoryUri }
                 }
             },
-            // logging: {
-            //     cloudWatch: {
-            //         logGroup: new cdk.aws_logs.LogGroup(this, 'ReactivitiesBuildProjectLogGroup', {
-            //             logGroupName: '/aws/codebuild/ReactivitiesBuildProject'
-            //         })
-            //     }
-            // },
-            // artifacts: codebuild.Artifacts.s3({
-            //     bucket: new s3.Bucket(this, 'ReactivitiesBucket', {
-            //         bucketName: 'reactivities-bucket'
-            //     }),
-            //     identifier: 'ReactivitiesBuildProject'
-            // }),
             buildSpec: codebuild.BuildSpec.fromObject({
                 version: '0.2',
                 env: {},
