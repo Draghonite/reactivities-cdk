@@ -8,7 +8,7 @@ import { Construct } from 'constructs';
 import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { Vpc } from 'aws-cdk-lib/aws-ec2';
-import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, ListenerConfig } from 'aws-cdk-lib/aws-ecs';
+import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, ListenerConfig, Secret } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 
@@ -31,7 +31,8 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             family: 'ReactivitiesFargateDefinition'
         });
         const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', 'staging/reactivities');
-        const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME)
+        const mySecret = secretsmanager.Secret.fromSecretCompleteArn(this, "mySecret", "arn:aws:secretsmanager:<region>:<account-id-number>:secret:<secret-name>-<random-6-characters>");
+        const repository = Repository.fromRepositoryName(this, "ReactivitiviesRepository", REPOSITORY_NAME);
         const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
             containerName: 'ReactivitiesContainer',
             image: ContainerImage.fromEcrRepository(repository, "latest"),
@@ -40,10 +41,13 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             environment: {
                 'ASPNETCORE_ENVIRONMENT': 'Production',
                 // 'Cloudinary__ApiSecret': secretsmanager.Secret.fromSecretNameV2(this, "CloudinarySecret", "Cloudinary__ApiSecret").secretValue.toString(),
-                'Cloudinary__ApiKey': secretsmanager.Secret.fromSecretNameV2(this, "CloudinaryAPIKey", "Cloudinary__ApiKey").secretValue.toString(),
+                'Cloudinary__ApiKey': secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPIKey', 'Cloudinary__ApiKey').secretValue.toString(),
                 // 'Cloudinary__CloudName': secretReactivities.secretValueFromJson('Cloudinary__CloudName').toString(),
                 // 'TokenKey': secretReactivities.secretValueFromJson('ReactivityTokenKey').toString(),
                 // 'DATABASE_URL': secretReactivities.secretValueFromJson('DATABASE_URL').toString()
+            },
+            secrets: {
+                'Cloudinary__ApiSecret': Secret.fromSecretsManager(secretsmanager.Secret.fromSecretNameV2(this, 'CloudinaryAPISecret', 'Cloudinary__ApiSecret'))
             },
             portMappings: [{ containerPort: 80 }]
         });
@@ -138,6 +142,7 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
             // }),
             buildSpec: codebuild.BuildSpec.fromObject({
                 version: '0.2',
+                env: {},
                 phases: {
                     install: {
                         'runtime-versions': {
@@ -150,8 +155,10 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     pre_build: {
                         commands: [
                             'echo "PRE-BUILD-STAGE"',
-                            'echo "*** CL_API_KEY ***" ${Cloudinary__ApiKey}',
-                            'echo $Cloudinary__ApiKey'
+                            'echo "*** CL_API_VALUES ***"',
+                            'echo $Cloudinary__ApiSecret',
+                            'echo $Cloudinary__ApiKey',
+                            'echo $Cloudinary__CloudName'
                         ]
                     },
                     build: {
