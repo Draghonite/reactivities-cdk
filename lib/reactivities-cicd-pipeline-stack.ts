@@ -8,6 +8,7 @@ import { Construct } from 'constructs';
 import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import ReactivitiesConfig from './reactivities-config';
+import { ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 
 export class ReactivitiesCICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -111,6 +112,15 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                 }
             })
         });
+
+        // TODO: must attach aws managed policy 'AmazonEC2ContainerRegistryPowerUser' to the build project's role
+        /*
+            TODO: may also need:
+                "Effect": "Allow",
+                "Action": "secretsmanager:GetSecretValue",
+                "Resource": "arn:aws:secretsmanager:*:904164939197:secret:*"
+        */
+        codeBuildProject.role?.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonEC2ContainerRegistryPowerUser'));
         const buildAction = new codepipeline_actions.CodeBuildAction({
             actionName: 'Build',
             project: codeBuildProject,

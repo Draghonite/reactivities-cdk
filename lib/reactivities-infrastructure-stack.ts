@@ -71,5 +71,6 @@ export class ReactivitiesInfrastructureStack extends cdk.Stack {
                 protocol: ApplicationProtocol.HTTPS
             })
         });
+        // TODO: document any manual clean-up necessary -- e.g. EIP, ENI, Subnet, VPC, SG, ... may remain between deployments
     }
 }
