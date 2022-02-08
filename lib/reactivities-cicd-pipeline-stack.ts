@@ -124,6 +124,22 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
                     post_build: {
                         commands: [
                             'echo "POST-BUILD-STAGE"',
+                            'echo Publish started on `date`',
+                            // # DotNet - publish release
+                            'dotnet publish src/API/API.csproj -r linux-x64 -c Release -o /app/publish',
+                            // # ECR - push docker image to ECR
+                            'echo Pushing the Docker images...',
+                            'docker push $REPOSITORY_URI:latest',
+                            'docker push $REPOSITORY_URI:$IMAGE_TAG',
+                            // # write image definitions file
+                            // # - apt-get install jq -y
+                            'ContainerName="ReactivitiesContainer"', // TODO: pass as an env variable
+                            'ImageURI=$REPOSITORY_URI:$IMAGE_TAG',
+                            'echo $ImageURI',
+                            'printf \'[{"name":"CONTAINER_NAME","imageUri":"IMAGE_URI"}]\' > imagedefinitions.json',
+                            'sed -i -e "s|CONTAINER_NAME|$ContainerName|g" imagedefinitions.json',
+                            'sed -i -e "s|IMAGE_URI|$ImageURI|g" imagedefinitions.json',
+                            'cat imagedefinitions.json'
                         ]
                     },
                 }
