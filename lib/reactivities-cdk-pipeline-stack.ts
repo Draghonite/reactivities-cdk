@@ -1,8 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { CodeBuildStep, CodePipeline, CodePipelineSource } from 'aws-cdk-lib/pipelines';
-import { SecretValue } from 'aws-cdk-lib';
+import { SecretValue, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { ReactivitiesCICDStage } from './reactivities-cicd-pipeline-stage';
+import { ReactivitiesCICDPipelineStack } from './reactivities-cicd-pipeline-stack';
 
 export class ReactivitiesCDKPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -11,7 +11,7 @@ export class ReactivitiesCDKPipelineStack extends cdk.Stack {
         // create a pipeline for CDK and its stages (watch for code updates to the CDK stack and self-mutate and provision the CI/CD stack)
         /*
             - Synth
-              - Source:ZGitHub url: https://github.com/Draghonite/reactivities-cdk
+              - Source:GitHub url: https://github.com/Draghonite/reactivities-cdk
             - Deploy
         */
 
@@ -36,5 +36,15 @@ export class ReactivitiesCDKPipelineStack extends cdk.Stack {
         // CI/CD stage (stack) provisioning along w/ necessary services
         const deploy = new ReactivitiesCICDStage(this, 'Deploy-CICD');
         const deployStage = pipeline.addStage(deploy);
+    }
+}
+
+export class ReactivitiesCICDStage extends Stage {
+    constructor(scope: Construct, id: string, props?: StageProps) {
+        super(scope, id, props);
+        
+        const service = new ReactivitiesCICDPipelineStack(this, 'ReactivitiesCICDPipelineStack', {
+            stackName: "ReactivitiesCICDPipelineStack"
+        });
     }
 }

@@ -52,6 +52,7 @@ export class ReactivitiesInfrastructureStack extends cdk.Stack {
             vpc: vpc
         });
         const service = new FargateService(this, 'ReactivitiesService', {
+            serviceName: ReactivitiesConfig.ECS_SERVICE_NAME,
             cluster: cluster,
             taskDefinition: fargateTaskDefinition,
             desiredCount: 1,

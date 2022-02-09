@@ -10,6 +10,9 @@ import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 import ReactivitiesConfig from './reactivities-config';
 import { ManagedPolicy } from 'aws-cdk-lib/aws-iam';
+import { EcsDeployAction } from 'aws-cdk-lib/aws-codepipeline-actions';
+import { Cluster, FargateService } from 'aws-cdk-lib/aws-ecs';
+import { SecurityGroup, Vpc } from 'aws-cdk-lib/aws-ec2';
 
 export class ReactivitiesCICDPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -175,15 +178,28 @@ export class ReactivitiesCICDPipelineStack extends cdk.Stack {
         });
         // #endregion
     
-        // TODO: need to figure this out -- performing an ECS deployment via a CodePipline stage/action
         // #region Deploy
-        // const deployAction = new ecs.FargateService(this, 'ReactivitiesDeployProject', {
-        //     cluster
-        // });
-        // pipeline.addStage({
-        //     stageName: 'Deploy',
-        //     actions: [deployAction]
-        // });
+        // TODO: this relies on deployment-time values -- look into how to make these automatable; for now, coded into reactivites-config and assumed can be coded
+        const baseService = FargateService.fromFargateServiceAttributes(this, 'ReactivitiesFargateService', {
+            cluster: Cluster.fromClusterAttributes(this, 'ReactivitiesECSClusterTesting', {
+                clusterName: ReactivitiesConfig.ECS_CLUSTER_NAME,
+                securityGroups: [SecurityGroup.fromSecurityGroupId(this, 'ReactivitiesTestingSG', ReactivitiesConfig.ECS_SECURITY_GROUP_ID)],
+                vpc: Vpc.fromVpcAttributes(this, 'ReactivitiesTestingVPC', {
+                    vpcId: ReactivitiesConfig.VPC_ID,
+                    availabilityZones: ReactivitiesConfig.VPC_AVAILABILITY_ZONES
+                })
+            }),
+            serviceName: ReactivitiesConfig.ECS_SERVICE_NAME
+        });
+        const deployAction = new EcsDeployAction({
+            actionName: 'ReactivitiesDeployTesting',
+            service: baseService,
+            input: buildOutput
+        });
+        pipeline.addStage({
+            stageName: 'Deploy',
+            actions: [deployAction]
+        });
         // #endregion
     }
 }
