@@ -5,7 +5,7 @@ import { ReactivitiesInfrastructureStack } from '../lib/infrastructure/reactivit
 
 const app = new cdk.App();
 
-// one-time infrastructure stack for the application (ECR, ECS [])
+// one-time infrastructure stack for the application (ECR, ECS + Fargate, VPC, ALB and related connectivity services)
 new ReactivitiesInfrastructureStack(app, 'ReactivitiesInfrastructureStack');
 
 // self-mutating stack + CI/CD-specific stack
