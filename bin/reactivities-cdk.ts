@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { ReactivitiesCDKPipelineStack } from '../lib/reactivities-cdk-pipeline-stack';
-import { ReactivitiesInfrastructureStack } from '../lib/reactivities-infrastructure-stack';
+import { ReactivitiesCDKPipelineStack } from '../lib/cdk/reactivities-cdk-pipeline-stack';
+import { ReactivitiesInfrastructureStack } from '../lib/infrastructure/reactivities-infrastructure-stack';
 
 const app = new cdk.App();
 

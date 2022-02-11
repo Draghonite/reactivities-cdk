@@ -8,7 +8,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
-import ReactivitiesConfig from './reactivities-config';
+import ReactivitiesConfig from '../shared/reactivities-config';
 import { ManagedPolicy } from 'aws-cdk-lib/aws-iam';
 import { EcsDeployAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { Cluster, FargateService } from 'aws-cdk-lib/aws-ecs';

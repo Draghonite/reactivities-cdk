@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { CodeBuildStep, CodePipeline, CodePipelineSource } from 'aws-cdk-lib/pipelines';
 import { SecretValue, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { ReactivitiesCICDPipelineStack } from './reactivities-cicd-pipeline-stack';
+import { ReactivitiesCICDPipelineStack } from '../cicd/reactivities-cicd-pipeline-stack';
 
 export class ReactivitiesCDKPipelineStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {

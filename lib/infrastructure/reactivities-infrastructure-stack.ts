@@ -5,7 +5,7 @@ import { Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, ListenerConfig, Secret } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import ReactivitiesConfig from './reactivities-config';
+import ReactivitiesConfig from '../shared/reactivities-config';
 import { RemovalPolicy } from 'aws-cdk-lib';
 
 export class ReactivitiesInfrastructureStack extends cdk.Stack {
