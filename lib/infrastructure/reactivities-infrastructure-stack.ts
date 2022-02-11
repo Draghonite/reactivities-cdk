@@ -1,3 +1,4 @@
+import { InfrastructureConfig } from './../../config/infrastructure-config';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
@@ -5,31 +6,36 @@ import { Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Cluster, ContainerImage, FargateService, FargateTaskDefinition, ListenerConfig, Secret } from 'aws-cdk-lib/aws-ecs';
 import { ApplicationLoadBalancer, ApplicationProtocol } from 'aws-cdk-lib/aws-elasticloadbalancingv2';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import ReactivitiesConfig from '../shared/reactivities-config';
 import { RemovalPolicy } from 'aws-cdk-lib';
 
 export class ReactivitiesInfrastructureStack extends cdk.Stack {
     constructor(scope: Construct, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
 
+        // TODO: update infrastructure for high availability (cross AZ) and allow choosing Fargate on dev/pre-prod and EC2 on Prod
+
+        // TODO: see about patching overrides passed in through props (the stack's props)
+        const infrastructureConfig = InfrastructureConfig;
+
         // provision ECR
         const repository = new Repository(this, 'ReactivitiesRepository', {
-            repositoryName: ReactivitiesConfig.ECR_REPOSITORY_NAME,
+            repositoryName: infrastructureConfig.ecrRepositoryName,
             // NOTE: dangerous but this IS meant to be a one-time deployment stack and if redeployment is necessary, would be justified
             removalPolicy: RemovalPolicy.DESTROY
         });
 
         // provision ECS
         const fargateTaskDefinition = new FargateTaskDefinition(this, 'ReactivitiesFargateDefinition', {
-            cpu: ReactivitiesConfig.ECS_FARGATE_CPU,
-            memoryLimitMiB: ReactivitiesConfig.ECS_FARGATE_MEMORY_LIMIT,
+            cpu: infrastructureConfig.ecsFargateCPU,
+            memoryLimitMiB: infrastructureConfig.ecsFargateMemoryLimit,
             family: 'ReactivitiesFargateDefinition'
         });
-        const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', ReactivitiesConfig.APPLICATION_SECRET);
+        const secretReactivities = secretsmanager.Secret.fromSecretNameV2(this, 'ReactivitiesSecret', infrastructureConfig.applicationSecret);
         const container = fargateTaskDefinition.addContainer('ReactivitiesContainer', {
-            containerName: ReactivitiesConfig.ECS_FARGATE_CONTAINER_NAME,
+            containerName: infrastructureConfig.ecsFargateContainerName,
             image: ContainerImage.fromEcrRepository(repository, "latest"),
-            memoryLimitMiB: ReactivitiesConfig.ECS_FARGATE_MEMORY_LIMIT,
+            memoryLimitMiB: infrastructureConfig.ecsFargateMemoryLimit,
+            // TODO: make these configurable
             environment: {
                 'ASPNETCORE_ENVIRONMENT': 'Production'
             },
@@ -40,19 +46,19 @@ export class ReactivitiesInfrastructureStack extends cdk.Stack {
                 'TokenKey': Secret.fromSecretsManager(secretReactivities, 'TokenKey'),
                 'DATABASE_URL': Secret.fromSecretsManager(secretReactivities, 'DATABASE_URL')
             },
-            portMappings: [{ containerPort: ReactivitiesConfig.ECS_FARGATE_CONTAINER_PORT }]
+            portMappings: [{ containerPort: infrastructureConfig.ecsFargateContainerPort }]
         });
 
         const vpc = new Vpc(this, 'ReactivitiesVPC', {
-            vpcName: ReactivitiesConfig.VPC_NAME,
-            cidr: ReactivitiesConfig.VPC_CIDR
+            vpcName: infrastructureConfig.vpcName,
+            cidr: infrastructureConfig.vpcCIDR
         });
         const cluster = new Cluster(this, 'ReactivitiesECSCluster', {
-            clusterName: ReactivitiesConfig.ECS_CLUSTER_NAME,
+            clusterName: infrastructureConfig.ecsClusterName,
             vpc: vpc
         });
         const service = new FargateService(this, 'ReactivitiesService', {
-            serviceName: ReactivitiesConfig.ECS_SERVICE_NAME,
+            serviceName: infrastructureConfig.ecsServiceName,
             cluster: cluster,
             taskDefinition: fargateTaskDefinition,
             desiredCount: 1,
@@ -65,7 +71,7 @@ export class ReactivitiesInfrastructureStack extends cdk.Stack {
         });
         const listener = loadBalancer.addListener('ReactivitiesALBListener', { port: 80, open: true });
         service.registerLoadBalancerTargets({
-            containerName: ReactivitiesConfig.ECS_FARGATE_CONTAINER_NAME,
+            containerName: infrastructureConfig.ecsFargateContainerName,
             containerPort: 80,
             newTargetGroupId: 'ReactivitiesTG',
             listener: ListenerConfig.applicationListener(listener, {
